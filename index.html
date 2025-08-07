@@ -516,7 +516,377 @@
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 		<script>
-			// 天体データ
+			function createProceduralTexture(bodyData) {
+				const canvas = document.createElement("canvas");
+				const ctx = canvas.getContext("2d");
+				canvas.width = 512;
+				canvas.height = 256;
+
+				switch (bodyData.name) {
+					case "太陽":
+						return createSunTexture(ctx, canvas);
+					case "地球":
+						return createEarthTexture(ctx, canvas);
+					case "月":
+						return createMoonTexture(ctx, canvas);
+					case "火星":
+						return createMarsTexture(ctx, canvas);
+					case "木星":
+						return createJupiterTexture(ctx, canvas);
+					case "土星":
+						return createSaturnTexture(ctx, canvas);
+					case "天王星":
+						return createUranusTexture(ctx, canvas);
+					case "海王星":
+						return createNeptuneTexture(ctx, canvas);
+					case "金星":
+						return createVenusTexture(ctx, canvas);
+					case "水星":
+						return createMercuryTexture(ctx, canvas);
+					default:
+						return createDefaultTexture(ctx, canvas, bodyData.color);
+				}
+			}
+
+			function createSunTexture(ctx, canvas) {
+				// 太陽の核融合模様
+				const gradient = ctx.createRadialGradient(256, 128, 0, 256, 128, 200);
+				gradient.addColorStop(0, "#ffff66");
+				gradient.addColorStop(0.3, "#ffaa00");
+				gradient.addColorStop(0.6, "#ff6600");
+				gradient.addColorStop(1, "#cc3300");
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// 太陽フレア模様
+				for (let i = 0; i < 50; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+					const radius = Math.random() * 20 + 5;
+
+					const flareGradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+					flareGradient.addColorStop(0, "rgba(255, 255, 255, 0.8)");
+					flareGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+					ctx.fillStyle = flareGradient;
+					ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createEarthTexture(ctx, canvas) {
+				// 地球の海と陸
+				const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+				gradient.addColorStop(0, "#87ceeb"); // 北極の氷
+				gradient.addColorStop(0.2, "#4682b4"); // 海
+				gradient.addColorStop(0.4, "#228b22"); // 森林
+				gradient.addColorStop(0.6, "#daa520"); // 砂漠
+				gradient.addColorStop(0.8, "#4682b4"); // 海
+				gradient.addColorStop(1, "#e0e0e0"); // 南極の氷
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// 大陸模様
+				for (let i = 0; i < 15; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+					const width = Math.random() * 100 + 50;
+					const height = Math.random() * 50 + 20;
+
+					ctx.fillStyle = `rgba(34, 139, 34, ${Math.random() * 0.5 + 0.3})`;
+					ctx.fillRect(x, y, width, height);
+				}
+
+				// 雲模様
+				for (let i = 0; i < 30; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+					const radius = Math.random() * 30 + 10;
+
+					ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.2})`;
+					ctx.beginPath();
+					ctx.arc(x, y, radius, 0, Math.PI * 2);
+					ctx.fill();
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createMoonTexture(ctx, canvas) {
+				// 月の表面
+				ctx.fillStyle = "#c0c0c0";
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// クレーター
+				for (let i = 0; i < 40; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+					const radius = Math.random() * 25 + 5;
+
+					const craterGradient = ctx.createRadialGradient(
+						x,
+						y,
+						0,
+						x,
+						y,
+						radius
+					);
+					craterGradient.addColorStop(0, "#808080");
+					craterGradient.addColorStop(0.7, "#a0a0a0");
+					craterGradient.addColorStop(1, "#c0c0c0");
+
+					ctx.fillStyle = craterGradient;
+					ctx.beginPath();
+					ctx.arc(x, y, radius, 0, Math.PI * 2);
+					ctx.fill();
+
+					// クレーターの縁
+					ctx.strokeStyle = "#606060";
+					ctx.lineWidth = 1;
+					ctx.stroke();
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createMarsTexture(ctx, canvas) {
+				// 火星の赤い表面
+				const gradient = ctx.createLinearGradient(
+					0,
+					0,
+					canvas.width,
+					canvas.height
+				);
+				gradient.addColorStop(0, "#cd853f");
+				gradient.addColorStop(0.3, "#cd5c5c");
+				gradient.addColorStop(0.6, "#a0522d");
+				gradient.addColorStop(1, "#8b4513");
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// 火星の渓谷と丘
+				for (let i = 0; i < 20; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+					const length = Math.random() * 100 + 50;
+
+					ctx.strokeStyle = `rgba(139, 69, 19, ${Math.random() * 0.5 + 0.3})`;
+					ctx.lineWidth = Math.random() * 3 + 1;
+					ctx.beginPath();
+					ctx.moveTo(x, y);
+					ctx.lineTo(x + length, y + Math.random() * 20 - 10);
+					ctx.stroke();
+				}
+
+				// 極冠
+				ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+				ctx.fillRect(0, 0, canvas.width, 20);
+				ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createJupiterTexture(ctx, canvas) {
+				// 木星の縞模様
+				const stripes = [
+					"#daa520",
+					"#ff8c00",
+					"#ffa500",
+					"#ffb347",
+					"#daa520",
+					"#cd853f",
+				];
+
+				const stripeHeight = canvas.height / stripes.length;
+
+				stripes.forEach((color, index) => {
+					ctx.fillStyle = color;
+					ctx.fillRect(0, index * stripeHeight, canvas.width, stripeHeight);
+				});
+
+				// 大赤斑
+				const spotX = canvas.width * 0.7;
+				const spotY = canvas.height * 0.4;
+				const spotGradient = ctx.createRadialGradient(
+					spotX,
+					spotY,
+					0,
+					spotX,
+					spotY,
+					40
+				);
+				spotGradient.addColorStop(0, "#ff4500");
+				spotGradient.addColorStop(0.5, "#ff6347");
+				spotGradient.addColorStop(1, "rgba(255, 99, 71, 0)");
+
+				ctx.fillStyle = spotGradient;
+				ctx.beginPath();
+				ctx.ellipse(spotX, spotY, 50, 30, 0, 0, Math.PI * 2);
+				ctx.fill();
+
+				// 嵐模様
+				for (let i = 0; i < 10; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+
+					ctx.fillStyle = `rgba(255, 165, 0, ${Math.random() * 0.3 + 0.1})`;
+					ctx.beginPath();
+					ctx.ellipse(
+						x,
+						y,
+						Math.random() * 20 + 10,
+						Math.random() * 10 + 5,
+						0,
+						0,
+						Math.PI * 2
+					);
+					ctx.fill();
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createSaturnTexture(ctx, canvas) {
+				// 土星の淡い色合い
+				const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+				gradient.addColorStop(0, "#faf0e6");
+				gradient.addColorStop(0.3, "#f5deb3");
+				gradient.addColorStop(0.6, "#deb887");
+				gradient.addColorStop(1, "#d2b48c");
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// 縞模様
+				for (let i = 0; i < 8; i++) {
+					const y = (canvas.height / 8) * i;
+					ctx.fillStyle = `rgba(210, 180, 140, ${Math.random() * 0.3 + 0.1})`;
+					ctx.fillRect(0, y, canvas.width, canvas.height / 16);
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createUranusTexture(ctx, canvas) {
+				// 天王星の青緑色
+				const gradient = ctx.createRadialGradient(256, 128, 0, 256, 128, 200);
+				gradient.addColorStop(0, "#40e0d0");
+				gradient.addColorStop(0.5, "#20b2aa");
+				gradient.addColorStop(1, "#008b8b");
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// メタンの雲
+				for (let i = 0; i < 15; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+
+					ctx.fillStyle = `rgba(64, 224, 208, ${Math.random() * 0.3 + 0.1})`;
+					ctx.beginPath();
+					ctx.arc(x, y, Math.random() * 20 + 5, 0, Math.PI * 2);
+					ctx.fill();
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createNeptuneTexture(ctx, canvas) {
+				// 海王星の深い青
+				const gradient = ctx.createRadialGradient(256, 128, 0, 256, 128, 200);
+				gradient.addColorStop(0, "#4169e1");
+				gradient.addColorStop(0.5, "#0066cc");
+				gradient.addColorStop(1, "#003366");
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// 大暗斑
+				const darkSpotX = canvas.width * 0.3;
+				const darkSpotY = canvas.height * 0.6;
+				ctx.fillStyle = "rgba(0, 0, 100, 0.5)";
+				ctx.beginPath();
+				ctx.ellipse(darkSpotX, darkSpotY, 40, 25, 0, 0, Math.PI * 2);
+				ctx.fill();
+
+				// 風の筋
+				for (let i = 0; i < 12; i++) {
+					const y = (canvas.height / 12) * i;
+					ctx.strokeStyle = `rgba(100, 149, 237, ${Math.random() * 0.3 + 0.1})`;
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					ctx.moveTo(0, y);
+					ctx.lineTo(canvas.width, y + Math.sin(i) * 10);
+					ctx.stroke();
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createVenusTexture(ctx, canvas) {
+				// 金星の硫酸雲
+				const gradient = ctx.createLinearGradient(
+					0,
+					0,
+					canvas.width,
+					canvas.height
+				);
+				gradient.addColorStop(0, "#ffc649");
+				gradient.addColorStop(0.3, "#ffb347");
+				gradient.addColorStop(0.6, "#daa520");
+				gradient.addColorStop(1, "#b8860b");
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// 雲の渦巻き模様
+				for (let i = 0; i < 20; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+
+					ctx.fillStyle = `rgba(255, 198, 73, ${Math.random() * 0.4 + 0.2})`;
+					ctx.beginPath();
+					ctx.arc(x, y, Math.random() * 15 + 5, 0, Math.PI * 2);
+					ctx.fill();
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createMercuryTexture(ctx, canvas) {
+				// 水星の岩石表面
+				const gradient = ctx.createRadialGradient(256, 128, 0, 256, 128, 200);
+				gradient.addColorStop(0, "#a0a0a0");
+				gradient.addColorStop(0.5, "#8c7853");
+				gradient.addColorStop(1, "#696969");
+
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// クレーター（月より小さく多い）
+				for (let i = 0; i < 60; i++) {
+					const x = Math.random() * canvas.width;
+					const y = Math.random() * canvas.height;
+					const radius = Math.random() * 15 + 2;
+
+					ctx.fillStyle = `rgba(105, 105, 105, ${Math.random() * 0.4 + 0.3})`;
+					ctx.beginPath();
+					ctx.arc(x, y, radius, 0, Math.PI * 2);
+					ctx.fill();
+				}
+
+				return new THREE.CanvasTexture(canvas);
+			}
+
+			function createDefaultTexture(ctx, canvas, color) {
+				ctx.fillStyle = `#${color.toString(16).padStart(6, "0")}`;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				return new THREE.CanvasTexture(canvas);
+			}
 			const celestialBodies = [
 				{
 					name: "太陽",
@@ -842,45 +1212,15 @@
 				// 軌道線を描画
 				createOrbitLines();
 
-				const textureLoader = new THREE.TextureLoader();
-
 				celestialBodies.forEach((bodyData) => {
 					const geometry = new THREE.SphereGeometry(bodyData.radius, 32, 32);
-					let material;
 
-					if (bodyData.imageUrl) {
-						// 初期マテリアル（テクスチャ読み込み前）
-						material = new THREE.MeshBasicMaterial({
-							color: bodyData.color,
-							transparent: true,
-							opacity: 0.9,
-						});
-
-						// テクスチャを非同期で読み込み
-						textureLoader.load(
-							bodyData.imageUrl,
-							function (texture) {
-								// テクスチャ読み込み成功
-								const texturedMaterial = new THREE.MeshBasicMaterial({
-									map: texture,
-									transparent: false,
-								});
-								celestialBody.material = texturedMaterial;
-							},
-							function (progress) {
-								// 読み込み中
-							},
-							function (error) {
-								// エラー時はカラーマテリアルのまま
-								console.log("テクスチャ読み込みエラー:", bodyData.name);
-							}
-						);
-					} else {
-						material = new THREE.MeshBasicMaterial({
-							color: bodyData.color,
-							transparent: true,
-						});
-					}
+					// プロシージャルテクスチャを作成
+					const texture = createProceduralTexture(bodyData);
+					const material = new THREE.MeshBasicMaterial({
+						map: texture,
+						transparent: false,
+					});
 
 					const celestialBody = new THREE.Mesh(geometry, material);
 
@@ -1355,7 +1695,7 @@
 					modal3DContainer.removeChild(modal3DContainer.firstChild);
 				}
 
-				// 天体の画像を表示
+				// 天体の画像を表示（元の実写画像）
 				if (bodyData.imageUrl) {
 					celestialImage.src = bodyData.imageUrl;
 					celestialImage.alt = `${bodyData.name}の画像`;
@@ -1368,7 +1708,7 @@
 					celestialImage.style.display = "none";
 				}
 
-				// メイン画面と同じ3Dモデルを作成（テクスチャ付き）
+				// メイン画面と同じ3Dモデルを作成（プロシージャルテクスチャ付き）
 				modalScene = new THREE.Scene();
 				modalCamera = new THREE.PerspectiveCamera(75, 250 / 120, 0.1, 1000);
 				modalRenderer = new THREE.WebGLRenderer({
@@ -1379,58 +1719,16 @@
 				modalRenderer.setClearColor(0x000011, 1);
 				modal3DContainer.appendChild(modalRenderer.domElement);
 
-				// テクスチャローダー
-				const textureLoader = new THREE.TextureLoader();
-
-				// 天体の3Dモデルを作成
+				// 天体の3Dモデルを作成（プロシージャルテクスチャ使用）
 				const geometry = new THREE.SphereGeometry(1.5, 32, 32);
-				let material;
-
-				if (bodyData.imageUrl) {
-					// 画像テクスチャを適用
-					textureLoader.load(
-						bodyData.imageUrl,
-						function (texture) {
-							// テクスチャ読み込み成功
-							material = new THREE.MeshBasicMaterial({
-								map: texture,
-								transparent: false,
-							});
-							updatePlanetMaterial(material);
-						},
-						function (progress) {
-							// 読み込み中
-						},
-						function (error) {
-							// エラー時はカラーマテリアルを使用
-							material = new THREE.MeshBasicMaterial({
-								color: bodyData.color,
-								transparent: true,
-							});
-							updatePlanetMaterial(material);
-						}
-					);
-
-					// 初期マテリアル（テクスチャ読み込み前）
-					material = new THREE.MeshBasicMaterial({
-						color: bodyData.color,
-						transparent: true,
-						opacity: 0.8,
-					});
-				} else {
-					// 画像がない場合はカラーマテリアル
-					material = new THREE.MeshBasicMaterial({
-						color: bodyData.color,
-						transparent: true,
-					});
-				}
+				const texture = createProceduralTexture(bodyData);
+				const material = new THREE.MeshBasicMaterial({
+					map: texture,
+					transparent: false,
+				});
 
 				const modalPlanet = new THREE.Mesh(geometry, material);
 				modalScene.add(modalPlanet);
-
-				function updatePlanetMaterial(newMaterial) {
-					modalPlanet.material = newMaterial;
-				}
 
 				// 太陽の特別エフェクト
 				if (bodyData.name === "太陽") {

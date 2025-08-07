@@ -168,10 +168,11 @@
 				object-fit: cover;
 				border-radius: 6px;
 				transition: transform 0.3s ease;
+				display: block;
 			}
 
 			.modal-image img:hover {
-				transform: scale(1.05);
+				transform: scale(1.02);
 			}
 
 			.modal-3d {
@@ -1102,9 +1103,9 @@
 					75,
 					window.innerWidth / window.innerHeight,
 					0.1,
-					2000
+					1000
 				);
-				camera.position.set(0, 50, 250);
+				camera.position.set(0, 30, 100);
 
 				// レンダラーの作成
 				renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -1281,14 +1282,14 @@
 				celestialBodies.forEach((bodyData) => {
 					if (bodyData.distance > 0 && bodyData.name !== "月") {
 						const orbitGeometry = new THREE.RingGeometry(
-							bodyData.distance - 0.2,
-							bodyData.distance + 0.2,
+							bodyData.distance - 0.3,
+							bodyData.distance + 0.3,
 							64
 						);
 						const orbitMaterial = new THREE.MeshBasicMaterial({
-							color: 0xcccccc,
+							color: 0x888888,
 							transparent: true,
-							opacity: 0.6,
+							opacity: 0.7,
 							side: THREE.DoubleSide,
 						});
 						const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
@@ -1494,10 +1495,10 @@
 
 					// ズーム制限
 					const distance = camera.position.length();
-					if (distance < 30) {
-						camera.position.normalize().multiplyScalar(30);
-					} else if (distance > 800) {
-						camera.position.normalize().multiplyScalar(800);
+					if (distance < 20) {
+						camera.position.normalize().multiplyScalar(20);
+					} else if (distance > 500) {
+						camera.position.normalize().multiplyScalar(500);
 					}
 				}
 
@@ -1695,20 +1696,59 @@
 					modal3DContainer.removeChild(modal3DContainer.firstChild);
 				}
 
-				// 天体の画像を表示（元の実写画像）
-				if (bodyData.imageUrl) {
-					celestialImage.src = bodyData.imageUrl;
-					celestialImage.alt = `${bodyData.name}の画像`;
+				// プロシージャルテクスチャを作成して画像として表示
+				const texture = createProceduralTexture(bodyData);
+
+				// Three.jsのCanvasTextureからimageを作成
+				if (texture && texture.image) {
+					celestialImage.src = texture.image.toDataURL();
+					celestialImage.alt = `${bodyData.name}のテクスチャ`;
 					celestialImage.style.display = "block";
+					celestialImage.onload = function () {
+						console.log(`${bodyData.name}の画像読み込み完了`);
+					};
 					celestialImage.onerror = function () {
-						// 画像読み込みに失敗した場合は非表示
-						this.style.display = "none";
+						console.log(`${bodyData.name}の画像読み込みエラー`);
+						// フォールバック：カラーで塗りつぶし
+						const fallbackCanvas = document.createElement("canvas");
+						const fallbackCtx = fallbackCanvas.getContext("2d");
+						fallbackCanvas.width = 512;
+						fallbackCanvas.height = 256;
+
+						const colorHex = `#${bodyData.color.toString(16).padStart(6, "0")}`;
+						fallbackCtx.fillStyle = colorHex;
+						fallbackCtx.fillRect(0, 0, 512, 256);
+
+						// 天体名を描画
+						fallbackCtx.fillStyle = "#ffffff";
+						fallbackCtx.font = "24px Arial";
+						fallbackCtx.textAlign = "center";
+						fallbackCtx.fillText(bodyData.name, 256, 128);
+
+						this.src = fallbackCanvas.toDataURL();
 					};
 				} else {
-					celestialImage.style.display = "none";
+					// フォールバック画像を直接作成
+					const fallbackCanvas = document.createElement("canvas");
+					const fallbackCtx = fallbackCanvas.getContext("2d");
+					fallbackCanvas.width = 512;
+					fallbackCanvas.height = 256;
+
+					const colorHex = `#${bodyData.color.toString(16).padStart(6, "0")}`;
+					fallbackCtx.fillStyle = colorHex;
+					fallbackCtx.fillRect(0, 0, 512, 256);
+
+					// 天体名を描画
+					fallbackCtx.fillStyle = "#ffffff";
+					fallbackCtx.font = "32px Arial";
+					fallbackCtx.textAlign = "center";
+					fallbackCtx.fillText(bodyData.name, 256, 128);
+
+					celestialImage.src = fallbackCanvas.toDataURL();
+					celestialImage.style.display = "block";
 				}
 
-				// メイン画面と同じ3Dモデルを作成（プロシージャルテクスチャ付き）
+				// メイン画面と同じ3Dモデルを作成（下部）
 				modalScene = new THREE.Scene();
 				modalCamera = new THREE.PerspectiveCamera(75, 250 / 120, 0.1, 1000);
 				modalRenderer = new THREE.WebGLRenderer({
@@ -1721,9 +1761,8 @@
 
 				// 天体の3Dモデルを作成（プロシージャルテクスチャ使用）
 				const geometry = new THREE.SphereGeometry(1.5, 32, 32);
-				const texture = createProceduralTexture(bodyData);
 				const material = new THREE.MeshBasicMaterial({
-					map: texture,
+					map: createProceduralTexture(bodyData),
 					transparent: false,
 				});
 

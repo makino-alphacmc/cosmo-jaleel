@@ -1102,9 +1102,9 @@
 					75,
 					window.innerWidth / window.innerHeight,
 					0.1,
-					1000
+					2000
 				);
-				camera.position.set(0, 30, 100);
+				camera.position.set(0, 50, 250);
 
 				// レンダラーの作成
 				renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -1286,9 +1286,9 @@
 							64
 						);
 						const orbitMaterial = new THREE.MeshBasicMaterial({
-							color: 0x444444,
+							color: 0xcccccc,
 							transparent: true,
-							opacity: 0.3,
+							opacity: 0.6,
 							side: THREE.DoubleSide,
 						});
 						const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
@@ -1494,10 +1494,10 @@
 
 					// ズーム制限
 					const distance = camera.position.length();
-					if (distance < 20) {
-						camera.position.normalize().multiplyScalar(20);
-					} else if (distance > 500) {
-						camera.position.normalize().multiplyScalar(500);
+					if (distance < 30) {
+						camera.position.normalize().multiplyScalar(30);
+					} else if (distance > 800) {
+						camera.position.normalize().multiplyScalar(800);
 					}
 				}
 
